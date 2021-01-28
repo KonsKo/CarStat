@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+{% block title %}Start{% endblock %}
+
+{% block content %}
+<h1 class="row justify-content-center p-4">Start</h1>
+<p class="row justify-content-center font-weight-bold text-info">
+    Выбирите сначала Брэнд для автомобиля затем Модель </p>
+<div class="row justify-content-center">
+    <div class="col-4">
+        <form method="post" id="startForm" data-models-url="{% url 'ajax_load_models' %}">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
