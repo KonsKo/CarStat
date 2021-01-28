@@ -5,6 +5,7 @@ class NewManager(models.Manager):
     def get_earliest_date(self, brand, model):
         return self.filter(brand=brand).filter(model=model).earliest('date_create').date_create
 
+
 class VehicleBrand(models.Model):
     name = models.CharField(max_length=128, unique=True)
 
@@ -13,13 +14,14 @@ class VehicleBrand(models.Model):
 
 class VehicleModel(models.Model):
     name = models.CharField(max_length=128, unique=True)
-    brand = models.ForeignKey(VehicleBrand, on_delete=models.PROTECT, blank=True, null=True, default=1)
+    brand = models.ForeignKey(VehicleBrand, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
 class VehicleGeneration(models.Model):
     name = models.CharField(max_length=128, unique=True)
+    brand = models.ForeignKey(VehicleBrand, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -93,7 +95,7 @@ class City(models.Model):
 
 class Vehicle(models.Model):
     link = models.CharField(max_length=256, unique=True, blank=False, null=False)
-    date_create = models.DateTimeField(blank=True)
+    date_create = models.DateTimeField(auto_now_add=True)
     date_finished = models.DateTimeField(blank=True, null=True)
     price = models.IntegerField(blank=False)
     brand = models.ForeignKey(VehicleBrand, on_delete=models.PROTECT)

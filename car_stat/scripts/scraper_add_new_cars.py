@@ -2,7 +2,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import re
 
-from accounts.models import *
+from get_car_info.models import *
 
 
 def run():
@@ -17,12 +17,15 @@ def run():
         driver.get(link)
         search = driver.find_elements_by_class_name('link-link-39EVK')
         for s in search:
-            element_link = s.get_attribute('href')
+            pattern = 'https\:\/\/www\.avito\.ru\/(\w+)\/avtomobili\/(\w+)'
+            element_link = str(s.get_attribute('href'))
+            if not re.search(pattern, element_link):
+                continue
+            elif not City.objects.filter(name=re.search(pattern, element_link).group(1)).exists():
+                #print('Skip, not RK', re.search(pattern, element_link).group(1))
+                continue
             if not Vehicle.objects.filter(link=element_link).exists():
                 elements.append(element_link)
-
-
-    print(elements)
 
     for element in elements:
         if element == None:
@@ -46,17 +49,22 @@ def run():
                 v_price = soup.find(class_='js-item-price').getText()
                 v_price = v_price.replace(' ','')
 
-                try:
-                    brand = car_dic.get('Марка')
-                    v_brand, created = VehicleBrand.objects.get_or_create(name=brand)
+                brand = car_dic.get('Марка')
+                v_brand, created = VehicleBrand.objects.get_or_create(name=brand)
 
-                    model = car_dic.get('Модель')
-                    v_model, created = VehicleModel.objects.get_or_create(name=model)
-                except:
-                    print('check it', element)
+                model = car_dic.get('Модель')
+                if VehicleModel.objects.filter(name=model).exists():
+                    v_model = VehicleModel.objects.get(name=model)
+                else:
+                    new_model = VehicleModel.objects.create(name=model, brand=v_brand)
+                    v_model = new_model
 
                 generation = car_dic.get('Поколение')
-                v_generation, created = VehicleGeneration.objects.get_or_create(name=generation)
+                if VehicleGeneration.objects.filter(name=generation).exists():
+                    v_generation = VehicleGeneration.objects.get(name=generation)
+                else:
+                    new_generation = VehicleGeneration.objects.create(name=generation, brand=v_brand)
+                    v_generation = new_generation
 
                 v_modification = car_dic.get('Модификация')
 
@@ -68,10 +76,16 @@ def run():
                 except:
                     v_mileage = 0
 
-                condition = car_dic.get('Состояние')
-                v_condition, created = VehicleCondition.objects.get_or_create(name=condition)
+                if car_dic.get('Состояние'):
+                    condition = car_dic.get('Состояние')
+                    v_condition, created = VehicleCondition.objects.get_or_create(name=condition)
+                else:
+                    v_condition = VehicleCondition.objects.get(name='небитый')
 
-                v_quantity_owner = car_dic.get('ВладельцевпоПТС')
+                if car_dic.get('ВладельцевпоПТС'):
+                    v_quantity_owner = car_dic.get('ВладельцевпоПТС')
+                else:
+                    v_quantity_owner = str(0)
 
                 body_type = car_dic.get('Типкузова')
                 v_body_type, created = VehicleBodyType.objects.get_or_create(name=body_type)
@@ -101,6 +115,19 @@ def run():
                     v_equipment, created = VehicleEquipment.objects.get_or_create(name=equipment)
 
                 v_address = soup.find(class_='item-address__string').getText()
+                if 'Республика Карелия' not in v_address:
+                    #print('***** Not RK', element)
+                    continue
+
+                v_region = Region.objects.get(name='karelia')
+
+                pattern = 'https\:\/\/www\.avito\.ru\/([a-z\_]+)\/avtomobili\/'
+                city = re.search(pattern, element).group(1)
+                if City.objects.filter(name=city).exists():
+                    v_city = City.objects.get(name=city)
+                else:
+                    new_city = City.objects.create(name=city, region=v_region)
+                    v_city = new_city
 
 
                 if 'Частное лицо' in soup.find(class_='item-view-content-right').getText():
@@ -118,8 +145,10 @@ def run():
                                   body_type=v_body_type, quantity_doors=v_quantity_doors,
                                   engine_type=v_engine_type, transmission=v_transmission,
                                   drive=v_drive, wheel=v_wheel, color=v_color, equipment=v_equipment,
-                                  address=v_address, seller_type=v_seller_type)
+                                  address=v_address, seller_type=v_seller_type,
+                                  region=v_region, city=v_city)
 
                 vehicle.save()
             except:
-                print('Not a car:', element)
+                pass
+                #print('Not a car:', element)
