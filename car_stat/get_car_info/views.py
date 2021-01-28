@@ -10,7 +10,6 @@ from .forms import StartForm
 from .models import *
 
 
-
 class StartView(FormView):
     form_class = StartForm
     template_name = 'get_car_info/start.html'
@@ -25,7 +24,7 @@ class StartView(FormView):
         return render(request, self.template_name, {'form': form})
 
 class InfoView(ListView):
-    template_name = 'carstat/brandmodel.html'
+    template_name = 'get_car_info/brandmodel.html'
 
     def get_queryset(self):
         self.brand = get_object_or_404(VehicleBrand, name=self.kwargs['brand'])
@@ -65,4 +64,4 @@ class InfoView(ListView):
 def load_models(request):
     brand_id = request.GET.get('brand_id')
     models = VehicleModel.objects.filter(brand_id=brand_id).all()
-    return render(request, 'carstat/model_dropdown_list_options.html', {'models': models})
+    return render(request, 'get_car_info/model_dropdown_list_options.html', {'models': models})
