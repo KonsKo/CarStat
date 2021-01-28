@@ -1,11 +1,15 @@
-from get_car_info.models import VehicleBodyType
+from get_car_info.models import City, Region
 
 import pandas as pd
 
 def run():
-    file = '/home/cat/ProjectsGit/for_stat_project_for_create_new_one/vehiclebodytype.csv'
+    file = '/home/cat/ProjectsGit/for_stat_project_for_create_new_one/vehiclecity.csv'
     df = pd.read_csv(file)
     for index, row in df.iterrows():
-        VehicleBodyType.objects.create(pk=int(row['id']), name=str(row['name']))
+        #region = Region.objects.get(pk=row['region_id'])
+        City.objects.create(pk=int(row['id']),
+                              name=str(row['name']),
+                              region_id=int(row['region_id']),
+                            )
 
 
