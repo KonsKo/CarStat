@@ -1,5 +1,9 @@
 from django import forms
+from django.db.models import Min
+
 from .models import *
+
+import datetime
 
 
 class StartForm(forms.ModelForm):
@@ -17,3 +21,16 @@ class StartForm(forms.ModelForm):
                 self.fields['model'].queryset = VehicleModel.objects.filter(brand=brand_id).order_by('name')
             except (ValueError, TypeError):
                 pass
+
+    def clean(self):
+        brand = self.cleaned_data['brand']
+        model = self.cleaned_data['model']
+        year = self.cleaned_data['year_manufacture']
+        min_year = Vehicle.objects.filter(brand=brand).filter(model=model).aggregate(Min('year_manufacture'))\
+            .get('year_manufacture__min')
+        max_year = int(datetime.datetime.now().year)
+        if year < min_year:
+            raise forms.ValidationError('Chosen year is too low, min year is {}'.format(min_year))
+        if year > max_year:
+            raise forms.ValidationError('Chosen year is too big, max year is {}'.format(max_year))
+
