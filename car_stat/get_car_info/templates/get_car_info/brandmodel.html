@@ -12,9 +12,19 @@
             <li>{{ v.link }} {{v.date_create.month}}</li>
             {% endfor %}
         </ul>
-        {% if price_list %}
-        {{ price_list }}
-        {% endif %}
+        <ul>
+            {% if price_list %}
+            <li>{{ price_list }}</li>
+            {% endif %}
+
+            {% if month_list %}
+            <li>{{ month_list }}</li>
+            {% endif %}
+
+            {% if quantity_list %}
+            <li>{{ quantity_list }}</li>
+            {% endif %}
+        </ul>
         <div class="chart-container" style="position: relative; height:400px; width:400px">
             <canvas id="myChart"></canvas>
         </div>
@@ -55,6 +65,8 @@ var myChart = new Chart(ctx, {
         }
     }
 });
+
+
 
 
 
