@@ -1,5 +1,5 @@
 from django.views.generic.edit import FormView
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.urls import reverse_lazy
 from django.db.models import Avg
 from django.shortcuts import render, redirect, get_object_or_404
@@ -31,14 +31,14 @@ class StartView(FormView):
                             )
         return render(request, self.template_name, {'form': form})
 
-class InfoView(ListView):
+class InfoView(TemplateView):
     template_name = 'get_car_info/brandmodel.html'
 
-    def get_queryset(self):
+    '''def get_queryset(self):
         year = self.request.session['year']
         self.brand = get_object_or_404(VehicleBrand, name=self.kwargs['brand'])
         self.model = get_object_or_404(VehicleModel, name=self.kwargs['model'])
-        return Vehicle.objects.filter(brand=self.brand).filter(model=self.model).filter(year_manufacture=year)
+        return Vehicle.objects.filter(brand=self.brand).filter(model=self.model).filter(year_manufacture=year)'''
 
     def get_context_data(self, *args, **kwargs):
         context = super(InfoView, self).get_context_data(*args, **kwargs)

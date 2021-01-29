@@ -7,9 +7,15 @@ from .models import *
 
 def data_for_plot(brand, model, year_manufacture):
     plot_data={}
-    vehicles = Vehicle.objects.filter(brand=brand).filter(model=model).filter(year_manufacture=year_manufacture)
+    vehicles2 = Vehicle.objects.filter(brand=brand).filter(model=model).filter(year_manufacture=year_manufacture)
+    gen_test = vehicles2.values_list('generation__name', flat=True).distinct().first()
+
+    vehicles = Vehicle.objects.filter(brand=brand, model=model, generation__name=gen_test)
+
+   # vehicles = vehicles.union(v_gen)
+
     mindate = Vehicle.objects.get_earliest_date(brand, model)
-    now=datetime.datetime.now()
+    now = datetime.datetime.now()
     start = 12 * int(mindate.year) + int(mindate.month) - 1
     finish = 12 * int(now.year) + int(now.month)
     price_list = []
