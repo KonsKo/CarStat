@@ -4,8 +4,12 @@
 <!DOCTYPE html>
 {% block title %}Info{% endblock %}
 {% block content %}
-<h1 class="row justify-content-center p-4" xmlns="http://www.w3.org/1999/html">Info</h1>
-<p class="row justify-content-center "> about </p>
+<h3 class="row justify-content-center p-2" >
+    Statistics for {{ brand }}, {{ model }}, {{year_manufacture}} year.
+</h3>
+<h5 class="row justify-content-center p-1" >
+    Statistics consider whole generation: {{ generation }}
+</h5>
 
 <div class="container">
     <div class="row">
@@ -18,7 +22,7 @@
                                 Средняя цена:
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ****
+                                {{ avg_price }}
                             </div>
                         </div>
                     </div>
@@ -31,10 +35,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Количество в месяц
+                                Количество в месяц, среднее:
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                help
+                                {{ avg_quantity }}
                             </div>
                         </div>
                     </div>
@@ -47,10 +51,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                test
+                                Пробег, средний:
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                help
+                                {{ avg_mileage }} km
                             </div>
                         </div>
                     </div>
@@ -63,10 +67,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                test
+                                Процент частных объявлений:
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                help
+                                {{ personal_seller }}%
                             </div>
                         </div>
                     </div>
@@ -98,7 +102,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        CСтатистика по месяцам
+                        Статистика по месяцам
                     </h6>
                 </div>
                 <div class="card-body">
@@ -133,31 +137,6 @@
 
 </div>
 
-<div class="row justify-content-center">
-    <div class="col-6">
-        <ul>
-            {% for v in object_list %}
-            <li>{{ v.link }} {{v.date_create.month}}</li>
-            {% endfor %}
-        </ul>
-        <ul>
-            {% if price_list %}
-            <li>{{ price_list }}</li>
-            {% endif %}
-
-            {% if month_list %}
-            <li>{{ month_list }}</li>
-            {% endif %}
-
-            {% if quantity_list %}
-            <li>{{ quantity_list }}</li>
-            {% endif %}
-        </ul>
-        <div class="chart-container" style="position: relative; height:400px; width:400px">
-            <canvas id="myChart"></canvas>
-        </div>
-    </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 

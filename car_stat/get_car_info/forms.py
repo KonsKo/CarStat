@@ -26,11 +26,15 @@ class StartForm(forms.ModelForm):
         brand = self.cleaned_data['brand']
         model = self.cleaned_data['model']
         year = self.cleaned_data['year_manufacture']
-        min_year = Vehicle.objects.filter(brand=brand).filter(model=model).aggregate(Min('year_manufacture'))\
-            .get('year_manufacture__min')
+        vehicles = Vehicle.objects.filter(brand=brand).filter(model=model)
+
+        min_year = vehicles.aggregate(Min('year_manufacture')).get('year_manufacture__min')
+
         max_year = int(datetime.datetime.now().year)
         if year < min_year:
             raise forms.ValidationError('Chosen year is too low, min year is {}'.format(min_year))
         if year > max_year:
             raise forms.ValidationError('Chosen year is too big, max year is {}'.format(max_year))
 
+        if vehicles.filter(year_manufacture=year).count() == 0:
+            raise forms.ValidationError('No cars for this filter')

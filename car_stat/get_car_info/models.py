@@ -5,6 +5,11 @@ class NewManager(models.Manager):
     def get_earliest_date(self, brand, model):
         return self.filter(brand=brand).filter(model=model).earliest('date_create').date_create
 
+    def filter_car_with_gen(self, brand, model, year_manufacture):
+        vehicles_no_gen = Vehicle.objects.filter(brand=brand, model=model, year_manufacture=year_manufacture)
+        gen = vehicles_no_gen.values_list('generation__name', flat=True).distinct().first()
+        vehicles_with_gen = Vehicle.objects.filter(brand=brand, model=model, generation__name=gen)
+        return vehicles_with_gen, gen
 
 class VehicleBrand(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -12,9 +17,15 @@ class VehicleBrand(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name',]
+
 class VehicleModel(models.Model):
     name = models.CharField(max_length=128, unique=True)
     brand = models.ForeignKey(VehicleBrand, on_delete=models.PROTECT, blank=True, null=True)
+
+    class Meta:
+        ordering = ['name',]
 
     def __str__(self):
         return self.name
