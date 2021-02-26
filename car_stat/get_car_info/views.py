@@ -1,14 +1,11 @@
 from django.views.generic.edit import FormView
 from django.views.generic import ListView, TemplateView
 from django.urls import reverse_lazy
-from django.db.models import Avg
 from django.shortcuts import render, redirect, get_object_or_404
 
-import datetime
 
 from .forms import StartForm
 from .models import *
-from .calculations import *
 
 
 class StartView(FormView):
@@ -35,16 +32,28 @@ class InfoView(TemplateView):
         self.brand = get_object_or_404(VehicleBrand, name=self.kwargs['brand'])
         self.model = get_object_or_404(VehicleModel, name=self.kwargs['model'])
         year_manufacture = self.request.session['year']
-        data = data_for_plot(brand=self.brand, model=self.model, year_manufacture=year_manufacture)
-        context['quantity_list'] = data.get('quantity_list')
-        context['price_list'] = data.get('price_list')
-        context['month_list'] = data.get('month_list')
-        context['avg_price'] = data.get('whole_avg_price')
+
+        vehicles, gen = Vehicle.objects.filter_car_with_gen(brand=self.brand,
+                                                            model=self.model,
+                                                            year_manufacture=year_manufacture)
+        if len(gen) > 1:
+            context['gen_list'] = gen
+        average_data = vehicles.aggregate(Avg('price'), Avg('mileage'))
+        mindate = Vehicle.objects.get_earliest_date(self.brand, self.model)
+        context['personal_seller'] = round(
+            vehicles.filter(seller_type__name='Частное лицо').count() / vehicles.count(), 2
+        ) * 100
+
+        context['price_list'], context['month_list'], context['quantity_list'] = \
+            create_month_statistics_list(vehicles, mindate, average_data.get('price__avg'))
+        context['avg_price'] = format(round(average_data.get('price__avg'), -2), '.2f')
         context['year_manufacture'] = year_manufacture
-        context['generation'] = data.get('generation')
-        context['avg_quantity'] = data.get('avg_quantity')
-        context['avg_mileage'] = data.get('avg_mileage')
-        context['personal_seller'] = data.get('personal_seller')
+        context['generation'] = gen.first()
+        context['avg_quantity'] = round(
+            sum(context['quantity_list']) / len(context['quantity_list'])
+        )
+        context['avg_mileage'] = format(round(average_data.get('mileage__avg'), -2), '.2f')
+
         return context
 
 def load_models(request):

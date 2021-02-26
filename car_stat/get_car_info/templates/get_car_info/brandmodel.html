@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% load test_tags %}
+{% load humanize %}
 <!DOCTYPE html>
 {% block title %}Info{% endblock %}
 {% block content %}
@@ -10,6 +11,14 @@
 <h5 class="row justify-content-center p-1" >
     Statistics consider whole generation: {{ generation }}
 </h5>
+{% if gen_list %}
+<h6 class="row text-danger justify-content-center p-1" >
+    There are more one generation for search: &nbsp
+    {% for gen in gen_list %}
+    <p class="text-info font-italic"> {{ gen }}, &nbsp </p>
+    {% endfor %}
+</h6>
+{% endif %}
 
 <div class="container">
     <div class="row">
@@ -22,7 +31,7 @@
                                 Средняя цена:
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ avg_price }}
+                                {{ avg_price|intcomma }}
                             </div>
                         </div>
                     </div>
@@ -54,7 +63,7 @@
                                 Пробег, средний:
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ avg_mileage }} km
+                                {{ avg_mileage|intcomma }} km
                             </div>
                         </div>
                     </div>
@@ -121,8 +130,8 @@
                             <tr>
                                 <th scope="row">{{ forloop.counter }}</th>
                                 <td>{{ month }}</td>
-                                <td>{{ price_list|get_one:forloop.counter}}</td>
-                                <td>{{ quantity_list|get_one:forloop.counter}}</td>
+                                <td>{{ price_list|get_one:forloop.counter|intcomma }}</td>
+                                <td>{{ quantity_list|get_one:forloop.counter }}</td>
                             </tr>
 
                             {% endfor %}

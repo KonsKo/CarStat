@@ -1,4 +1,31 @@
 from django.db import models
+from django.db.models import Avg
+
+import datetime
+import calendar
+
+
+def create_month_statistics_list(vehicles, mindate, whole_avg_price):
+    price_list = []
+    month_list = []
+    quantity_list = []
+    now = datetime.datetime.now()
+    start = 12 * int(mindate.year) + int(mindate.month) - 1
+    finish = 12 * int(now.year) + int(now.month)
+    for step in range(start, finish):
+        year, month = divmod(step, 12)
+        vv = vehicles.filter(date_create__year=year, date_create__month=month + 1)
+        try:
+            avg_price = format(round(vv.aggregate(Avg('price')).get('price__avg'), -2), '.2f')
+        except:
+            avg_price = format(round(whole_avg_price, -2), '.2f')
+        price_list.append(avg_price)
+        total = vv.count()
+        quantity_list.append(total)
+        cur = str(calendar.month_name[month + 1]) + ', ' + str(year)
+        month_list.append(cur)
+
+    return price_list, month_list, quantity_list
 
 
 class NewManager(models.Manager):
@@ -6,10 +33,13 @@ class NewManager(models.Manager):
         return self.filter(brand=brand).filter(model=model).earliest('date_create').date_create
 
     def filter_car_with_gen(self, brand, model, year_manufacture):
-        vehicles_no_gen = Vehicle.objects.filter(brand=brand, model=model, year_manufacture=year_manufacture)
-        gen = vehicles_no_gen.values_list('generation__name', flat=True).distinct().first()
-        vehicles_with_gen = Vehicle.objects.filter(brand=brand, model=model, generation__name=gen)
+        vehicles_no_gen = Vehicle.objects.filter(brand__name=brand, model__name=model,
+                                                 year_manufacture=year_manufacture)
+        gen = vehicles_no_gen.values_list('generation__name', flat=True).distinct()
+        vehicles_with_gen = Vehicle.objects.filter(brand=brand, model=model, generation__name=gen.first())
+        #vehicles_with_gen = Vehicle.objects.filter(brand=brand, model=model, generation__name__in=gen)   # all generations
         return vehicles_with_gen, gen
+
 
 class VehicleBrand(models.Model):
     name = models.CharField(max_length=128, unique=True)
