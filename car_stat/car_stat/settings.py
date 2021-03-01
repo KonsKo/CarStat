@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,6 +44,8 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'crispy_forms',
     'django_extensions',
+    'django_celery_beat',
+    'django_celery_results',
 
     'get_car_info',
 ]
@@ -131,3 +135,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+CELERY_RESULT_BACKEND = "django-db"
+
+CELERY_TIMEZONE = 'Europe/Moscow'
