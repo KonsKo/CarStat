@@ -23,9 +23,10 @@ class StartForm(forms.ModelForm):
                 pass
 
     def clean(self):
-        brand = self.cleaned_data['brand']
-        model = self.cleaned_data['model']
-        year = self.cleaned_data['year_manufacture']
+        super().clean()
+        brand = self.cleaned_data["brand"]
+        model = self.cleaned_data["model"]
+        year = self.cleaned_data["year_manufacture"]
         vehicles = Vehicle.objects.filter(brand=brand).filter(model=model)
 
         min_year = vehicles.aggregate(Min('year_manufacture')).get('year_manufacture__min')
@@ -38,3 +39,4 @@ class StartForm(forms.ModelForm):
 
         if vehicles.filter(year_manufacture=year).count() == 0:
             raise forms.ValidationError('No cars for this filter')
+

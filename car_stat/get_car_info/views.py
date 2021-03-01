@@ -40,6 +40,7 @@ class InfoView(TemplateView):
             context['gen_list'] = gen
         average_data = vehicles.aggregate(Avg('price'), Avg('mileage'))
         mindate = Vehicle.objects.get_earliest_date(self.brand, self.model)
+
         context['personal_seller'] = round(
             vehicles.filter(seller_type__name='Частное лицо').count() / vehicles.count(), 2
         ) * 100

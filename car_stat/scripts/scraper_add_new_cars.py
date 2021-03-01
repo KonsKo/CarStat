@@ -1,12 +1,15 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import re
+import time
+import random
 
 from get_car_info.models import *
 
 
 def run():
 
+    counter = 0
     link_start = 'https://www.avito.ru/kareliya/avtomobili?s=104&p='
 
     driver = webdriver.Chrome()
@@ -149,6 +152,11 @@ def run():
                                   region=v_region, city=v_city)
 
                 vehicle.save()
+                counter +=1
+                time.sleep(random.randint(2, 6))
+                
             except:
                 pass
                 #print('Not a car:', element)
+
+    print('Were added {} cars'.format(counter))
